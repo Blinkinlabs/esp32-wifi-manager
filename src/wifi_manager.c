@@ -949,6 +949,7 @@ void wifi_manager( void * pvParameters ){
 			.ssid_hidden = wifi_settings.ap_ssid_hidden,
 			.max_connection = DEFAULT_AP_MAX_CONNECTIONS,
 			.beacon_interval = DEFAULT_AP_BEACON_INTERVAL,
+            .pairwise_cipher = WIFI_CIPHER_TYPE_CCMP,   // iOS marks the default config as unsafe: https://github.com/espressif/esp-idf/issues/5963 
 		},
 	};
 	memcpy(ap_config.ap.ssid, wifi_settings.ap_ssid , sizeof(wifi_settings.ap_ssid));
