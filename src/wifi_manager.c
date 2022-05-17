@@ -608,7 +608,7 @@ static void wifi_manager_event_handler(void* arg, esp_event_base_t event_base, i
 		 * arise. Upon receiving this event, the event task will initialize the LwIP network interface (netif).
 		 * Generally, the application event callback needs to call esp_wifi_connect() to connect to the configured AP. */
 		case WIFI_EVENT_STA_START:
-			ESP_LOGI(TAG, "");
+			ESP_LOGI(TAG, "WIFI_EVENT_STA_START");
 			break;
 
 		/* If esp_wifi_stop() returns ESP_OK and the current Wi-Fi mode is Station or AP+Station, then this event will arise.
@@ -1040,7 +1040,10 @@ void wifi_manager( void * pvParameters ){
 				uxBits = xEventGroupGetBits(wifi_manager_event_group);
 				if(! (uxBits & WIFI_MANAGER_SCAN_BIT) ){
 					xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_SCAN_BIT);
-					ESP_ERROR_CHECK(esp_wifi_scan_start(&scan_config, false));
+					const esp_err_t ret = esp_wifi_scan_start(&scan_config, false);
+                    if(ret != ESP_OK) {
+                        ESP_LOGE(TAG, "Error starting wifi scan, ret:%i", ret);
+                    }
 				}
 
 				/* callback */
