@@ -30,7 +30,30 @@ config WEBAPP_LOCATION
     help
     This parameter helps you relocate the wifimanager to another URL, for instance /wifimanager/ The trailing slash is important and should be included
 
+choice
+    prompt "Method to set the Access Point SSID"
+
+    config SSID_MAC
+        bool "Auto-generate based on hardware MAC address"
+        help
+        Generate a unique access point SSID (network name) based on the MAC address of the device. This is helpful when the code is loaded onto multiple devices.
+
+    config SSID_FIXED
+        bool "Fixed string"
+        help
+        Use a fixed SSID for the access point
+
+endchoice
+
+config DEFAULT_AP_SSID_PREFIX
+    depends on SSID_MAC
+    string "Access Point SSID prefix"
+    default "esp32-"
+    help
+	Prefix to add before the MAC address of the auto-generated SSID (network name). For example, if the prefix is set to esp32-, then then SSID would be something like esp32-AA-BB-CC-DD-EE-FF.
+
 config DEFAULT_AP_SSID
+    depends on SSID_FIXED
     string "Access Point SSID"
     default "esp32"
     help

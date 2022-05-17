@@ -46,6 +46,7 @@ Contains the freeRTOS task and all necessary support
 #include "esp_netif.h"
 #include "esp_wifi_types.h"
 #include "esp_log.h"
+#include "esp_mac.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "mdns.h"
@@ -101,7 +102,9 @@ static esp_netif_t* esp_netif_ap = NULL;
  * The actual WiFi settings in use
  */
 struct wifi_settings_t wifi_settings = {
+#ifdef CONFIG_SSID_FIXED
 	.ap_ssid = DEFAULT_AP_SSID,
+#endif
 	.ap_pwd = DEFAULT_AP_PASSWORD,
 	.ap_channel = DEFAULT_AP_CHANNEL,
 	.ap_ssid_hidden = DEFAULT_AP_SSID_HIDDEN,
@@ -172,6 +175,21 @@ void wifi_manager_disconnect_async(){
 	wifi_manager_send_message(WM_ORDER_DISCONNECT_STA, NULL);
 }
 
+#ifdef CONFIG_SSID_MAC
+void make_ssid_mac(uint8_t* buf, const size_t buf_len) {
+    uint8_t mac[6];
+    ESP_ERROR_CHECK(esp_efuse_mac_get_default(mac));
+
+    snprintf((char*)buf,buf_len,"%s%02x%02x%02x%02x%02x%02x",
+        CONFIG_DEFAULT_AP_SSID_PREFIX,
+        mac[0],
+        mac[1],
+        mac[2],
+        mac[3],
+        mac[4],
+        mac[5]);
+}
+#endif
 
 void wifi_manager_start(){
 
@@ -201,6 +219,10 @@ void wifi_manager_start(){
 	wifi_manager_sta_ip = (char*)malloc(sizeof(char) * IP4ADDR_STRLEN_MAX);
 	wifi_manager_safe_update_sta_ip_string((uint32_t)0);
 	wifi_manager_event_group = xEventGroupCreate();
+
+#ifdef CONFIG_SSID_MAC
+    make_ssid_mac(wifi_settings.ap_ssid, sizeof(wifi_settings.ap_ssid));
+#endif
 
 	/* create timer for to keep track of retries */
 	wifi_manager_retry_timer = xTimerCreate( NULL, pdMS_TO_TICKS(WIFI_MANAGER_RETRY_TIMER), pdFALSE, ( void * ) 0, wifi_manager_timer_retry_cb);
