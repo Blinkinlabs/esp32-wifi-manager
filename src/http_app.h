@@ -66,6 +66,8 @@ void http_app_stop();
 esp_err_t http_app_set_handler_hook( httpd_method_t method,  esp_err_t (*handler)(httpd_req_t *r)  );
 
 
+void http_app_set_uri_callback(void (*func_ptr)(httpd_handle_t handle));
+
 #ifdef __cplusplus
 }
 #endif

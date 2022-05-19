@@ -337,6 +337,12 @@ static const httpd_uri_t http_server_delete_request = {
 };
 
 
+static void (*uri_callback)(httpd_handle_t handle) = NULL;
+
+void http_app_set_uri_callback(void (*func_ptr)(httpd_handle_t handle)) {
+    uri_callback = func_ptr;
+}
+
 void http_app_stop(){
 
 	if(httpd_handle != NULL){
@@ -363,6 +369,10 @@ void http_app_start(bool lru_purge_enable){
 
 	    if (err == ESP_OK) {
 	        ESP_LOGI(TAG, "Registering URI handlers");
+            if(uri_callback != NULL) {
+                (*uri_callback)(httpd_handle);
+            }
+
 	        httpd_register_uri_handler(httpd_handle, &http_server_get_request);
 	        httpd_register_uri_handler(httpd_handle, &http_server_post_request);
 	        httpd_register_uri_handler(httpd_handle, &http_server_delete_request);
